@@ -1,0 +1,9 @@
+[package]
+name = "sniffer"
+version = "0.1.0"
+authors = ["Ivan Nikitin <nikitin.ivan.dev@gmail.com>"]
+
+[dependencies]
+dotenv = "0.15.0"
+argparse = "0.2.2"
+pcap = { version = "0.8", features = ["capture-stream"] }
