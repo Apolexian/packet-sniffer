@@ -3,6 +3,7 @@ extern crate pcap;
 
 use argparse::{ArgumentParser, Store, StoreTrue};
 use pcap::{Capture, Device};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 fn show_devices(devices: &Vec<Device>) {
     for device in devices {
@@ -58,14 +59,31 @@ fn main() {
         .unwrap()
         .open()
         .unwrap();
-
-    let mut file: pcap::Savefile = match captured_device.savefile("./dump.pcap") {
+    let start_time = SystemTime::now();
+    let time_since_the_epoch = start_time
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards");
+    let start_time_in_seconds = time_since_the_epoch.as_secs();
+    let mut i = 1;
+    let mut file: pcap::Savefile = match captured_device.savefile(format!("dump{}.pcap", i)) {
         Ok(f) => f,
         Err(_) => std::process::exit(1),
     };
-
     while let Ok(packet) = captured_device.next() {
         println!("Got a packet: {:?}", packet.header);
         file.write(&packet);
+        if SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_secs()
+            - start_time_in_seconds
+            > 86400
+        {
+            file = match captured_device.savefile(format!("dump{}.pcap", i)) {
+                Ok(f) => f,
+                Err(_) => std::process::exit(1),
+            };
+            i += 1;
+        }
     }
 }
