@@ -101,7 +101,7 @@ fn main() {
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
             .as_secs();
-        if current_time - start_time_in_seconds > 60 {
+        if current_time - start_time_in_seconds > 43200 {
             file_name = format!("dump{}.pcap", i);
             upload_to_s3(&file_name).expect("Failed to upload");
             i += 1;
